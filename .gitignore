@@ -122,3 +122,4 @@ dist
 package-lock.json
 yarn.lock
 .codesandbox/
+.DS_Store

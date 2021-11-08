@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Long Polling Chatting</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      .chat_log {
+        position: absolute;
+        width: 200px;
+        height: 50%;
+        border: 1px solid black;
+      }
+
+      ul {
+        list-style-type: none;
+        padding-inline-start: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Long Polling Chatting</h1>
+    <h3>내이름 : </h3>
+    <input type="text" id="chat_input" /><button id="btn_send">Send</button>
+    <div class="chat_log">
+      <ul></ul>
+    </div>
+
+    <script>
+      $(function () {
+        longPolling();
+        setTimeout(() => join(), 1000);
+      });
+
+      let name = prompt("input your name");
+      $("h3").append(name);
+      
+      let exit = false;
+      let longPolling = function () {
+        $.ajax({
+          url: "/chat/"+name,
+          method: "GET",
+          beforeSend: function (xhr, opts) {
+            if (exit) {
+              xhr.abort();
+            }
+          },
+          success: function (data) {
+            printChatting(data);
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.readyState == 0) {
+              exit = true;
+            }
+          },
+          complete: longPolling
+        });
+        console.log("polling");
+      };
+
+      let join = function () {
+        let data = {
+          name: name,
+          type: "welcomeMsg"
+        };
+
+        $.ajax({
+          url: "/chat",
+          method: "POST",
+          dataType: "json",
+          data: data
+        });
+        console.log("join");
+      };
+
+      let printChatting = function (data) {
+        if (data.type === "welcomeMsg") {
+          $(".chat_log ul").append("<p style='color: blue;'>" + (data.name === name ? "방에 입장했습니다." : data.name + "님이 방에 입장했습니다.") + "</p>");
+        } else if (data.type === "chattingMsg") {
+          $(".chat_log ul").append("<p>" + (data.name === name ? "나" : data.name) + " : " + data.message + "</p>");
+        }
+      };
+
+      $("#btn_send").on("click", function () {
+        let data = {
+          name: name,
+          message: $("#chat_input").val(),
+          type: "chattingMsg"
+        };
+
+        $.ajax({
+          url: "/chat",
+          method: "POST",
+          dataType: "json",
+          data: data,
+          complete: function () {
+            $("#chat_input").val("");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
