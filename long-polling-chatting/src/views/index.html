@@ -57,7 +57,7 @@
             printChatting(data);
           },
           error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.readyState == 0 && textStatus !=="timeout") {
+            if (XMLHttpRequest.readyState === 0 && textStatus !== "timeout") {
               exit = true;
             }
           },
