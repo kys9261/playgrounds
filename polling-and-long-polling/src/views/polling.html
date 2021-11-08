@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Polling</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      let tryCnt = 0;
+      var polling = setInterval(function () {
+        $.ajax({
+          url: "/xhr_polling",
+          success: function (data) {
+            if (data.msg.length != 0) {
+              $("#server_status").text("UPDATE");
+              // 샘플에서는 서버에 변경된 데이터가 있으면 요청을 중단한다.
+              clearInterval(polling);
+            }
+            $("#log").append("<p>" + tryCnt++ + " : " + data.msg + "</p>");
+          }
+        });
+      }, 2000); // 2초에 한번씩 요청한다.
+    </script>
+  </head>
+  <body>
+    <h1>Polling</h1>
+    <div>Server Status : <span id="server_status">_</span></div>
+    <div id="log"></div>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Long Polling</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      let tryCnt = 0;
+
+      (function longPolling() {
+        $.ajax({
+          url: "/xhr_long_polling",
+          beforeSend: function (xhr, opts) {
+            // 샘플에서는 5번 까지만 요청하고 종료한다.
+            if (tryCnt > 4) {
+              xhr.abort();
+            }
+          },
+          success: function (data) {
+            $("#log").append("<p>" + tryCnt++ + " : " + data.msg + "</p>");
+          },
+          // 응답이 오거나 에러가 발생하면 complete 이벤트가 발생. 다시 longPolling 요청을 한다
+          complete: longPolling
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <h1>Long Polling</h1>
+    <div id="log"></div>
+  </body>
+</html>
